@@ -1,0 +1,124 @@
+# This Python 3 environment comes with many helpful analytics libraries installed
+# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python
+# For example, here's several helpful packages to load
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+import os
+
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+
+# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
+# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+import numpy as nm  
+import matplotlib.pyplot as mtp  
+import pandas as pd  
+  
+#importing datasets  
+data_set= pd.read_csv('/kaggle/input/spaceship-titanic/train.csv')  
+data_set.head()
+data_set.describe()
+data_set.isnull().sum()
+data_set[data_set["Transported"]==True]
+data_set[["Deck", "Cabin_n", "Side"]]=data_set['Cabin'].str.split("/", expand = True)
+data_set=data_set[["Name","PassengerId","HomePlanet","CryoSleep","Cabin_n","Destination","Age","VIP","RoomService","FoodCourt","ShoppingMall","Spa","VRDeck","Deck", "Side","Transported"]]
+data_set.head()
+data_set[data_set["Transported"]==True].isnull().sum()
+data_set[data_set["Transported"]==True].describe()
+data_set["HomePlanet"].unique()
+data_set["Destination"].unique()
+data_set["Side"].unique()
+data_set["Deck"].unique()
+data_set["Cabin_n"].unique()
+from sklearn import preprocessing
+le = preprocessing.LabelEncoder()
+data_set["Transported"]=le.fit_transform(data_set["Transported"])
+data_set["HomePlanet"]=le.fit_transform(data_set["HomePlanet"])
+data_set["CryoSleep"]=le.fit_transform(data_set["CryoSleep"])
+data_set["Destination"]=le.fit_transform(data_set["Destination"])
+data_set["Side"]=le.fit_transform(data_set["Side"])
+data_set["Deck"]=le.fit_transform(data_set["Deck"])
+#data_set["VIP"]=le.fit_transform(data_set["VIP"])
+data_set["Cabin_n"]=le.fit_transform(data_set["Cabin_n"])
+
+data_set.head()
+data_set=data_set.drop(["Name","PassengerId","Destination","VIP"],axis=1)
+print(data_set)
+data_set["RoomService"]=data_set["RoomService"].fillna(data_set["RoomService"].mean())
+data_set["FoodCourt"]=data_set["FoodCourt"].fillna(data_set["FoodCourt"].mean())
+data_set["ShoppingMall"]=data_set["ShoppingMall"].fillna(data_set["ShoppingMall"].mean())
+data_set["Spa"]=data_set["Spa"].fillna(data_set["Spa"].mean())
+data_set["VRDeck"]=data_set["VRDeck"].fillna(data_set["VRDeck"].mean())
+data_set["Age"]=data_set["Age"].fillna(data_set["Age"].mean())
+data_set["Deck"]=data_set["Deck"].fillna(data_set["Deck"].mean())
+data_set["Side"]=data_set["Side"].fillna(data_set["Side"].mean())
+#data_set["VIP"]=data_set["VIP"].fillna(data_set["VIP"].mean())
+data_set["Cabin_n"]=data_set["Cabin_n"].fillna(data_set["Cabin_n"].mean())
+x=data_set.drop("Transported",axis=1)
+y=data_set["Transported"]
+from sklearn.feature_selection import mutual_info_classif
+import matplotlib.pyplot as plt
+importance=mutual_info_classif(x,y)
+f=pd.Series(importance,x.columns[0:len(x.columns)])
+f.plot(kind="barh")
+plt.show()
+x.head()
+y.head()
+#from sklearn.model_selection import train_test_split  
+#x_train, x_test, y_train, y_test= train_test_split(x, y, test_size= 0.25, random_state=100)  
+from sklearn.preprocessing import StandardScaler    
+st_x= StandardScaler()    
+x= st_x.fit_transform(x)    
+#x_train= st_x.fit_transform(x_train)    
+#x_test= st_x.transform(x_test)  
+from sklearn.ensemble import RandomForestClassifier  
+classifier= RandomForestClassifier(n_estimators= 238,max_depth=9,random_state=628,criterion="entropy",oob_score=True)
+#Best hyperparameters: {'max_depth': 450, 'n_estimators': 2537, 'random_state': 9711}
+classifier.fit(x, y)  
+#classifier.fit(x_train, y_train)  
+#y_pred= classifier.predict(x_test)  
+#from sklearn.metrics import accuracy_score
+#print(accuracy_score(y_test,y_pred))
+'''from sklearn.ensemble import RandomForestClassifier
+from scipy.stats import randint
+from sklearn.model_selection import RandomizedSearchCV
+param_dist = {'n_estimators': randint(1,10000),
+              'max_depth': randint(1,500),
+             'random_state':randint(1,10000)}
+rm = RandomForestClassifier(criterion="entropy")
+rand_search = RandomizedSearchCV(rm, param_distributions = param_dist, n_iter=10,cv=5,scoring='accuracy')
+
+rand_search.fit(x_train, y_train)
+
+best_rf = rand_search.best_estimator_
+print('Best hyperparameters:',rand_search.best_params_)'''
+d=pd.read_csv("/kaggle/input/spaceship-titanic/test.csv")
+d[["Deck", "Cabin_n", "Side"]]=d['Cabin'].str.split("/", expand = True)
+d=d[["Name","PassengerId","HomePlanet","CryoSleep","Cabin_n","Destination","Age","VIP","RoomService","FoodCourt","ShoppingMall","Spa","VRDeck","Deck", "Side"]]
+df=d.drop(["Name","PassengerId","Destination","VIP"],axis=1)
+from sklearn import preprocessing
+le = preprocessing.LabelEncoder()
+df["HomePlanet"]=le.fit_transform(df["HomePlanet"])
+df["CryoSleep"]=le.fit_transform(df["CryoSleep"])
+df["Side"]=le.fit_transform(df["Side"])
+df["Deck"]=le.fit_transform(df["Deck"])
+#df["VIP"]=le.fit_transform(df["VIP"])
+df["Cabin_n"]=le.fit_transform(df["Cabin_n"])
+df.head()
+df["RoomService"]=df["RoomService"].fillna(data_set["RoomService"].mean())
+df["FoodCourt"]=df["FoodCourt"].fillna(data_set["FoodCourt"].mean())
+df["ShoppingMall"]=df["ShoppingMall"].fillna(data_set["ShoppingMall"].mean())
+df["Spa"]=df["Spa"].fillna(data_set["Spa"].mean())
+df["VRDeck"]=df["VRDeck"].fillna(data_set["VRDeck"].mean())
+df["Age"]=df["Age"].fillna(data_set["Age"].mean())
+df["Deck"]=df["Deck"].fillna(df["Deck"].mean())
+df["Side"]=df["Side"].fillna(df["Side"].mean())
+#df["VIP"]=df["VIP"].fillna(df["VIP"].mean())
+pred=classifier.predict(df)
+pred=pred.astype(bool)
+output = pd.DataFrame({'PassengerId': d.PassengerId, 'Transported': pred})
+output.to_csv('submission8.csv', index=False)
+output.head()
